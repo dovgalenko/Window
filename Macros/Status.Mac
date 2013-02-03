@@ -1,0 +1,60 @@
+comment~
+
+      Small macroses for Win32 Assembly.
+
+      The CHEMI$T Copyright(C)2001      					      02.05.2001
+
+~
+
+; Status line creation macro
+@CreateStatus  MACRO Name, ParentName, uID
+               IFNDEF InitCommonControl
+                 InitCommonControl Equ TRUE
+                 .code
+                 invoke InitCommonControls
+               ENDIF
+
+               IFDEF stat&Name
+               .code
+                 invoke CreateStatusWindow, WS_VISIBLE or WS_CHILD, NULL, hWnd&ParentName, uID
+                 mov    stat&Name, eax
+                 invoke SetWindowPos, stat&Name, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE
+               ELSE
+                 @MakeError 'Status line was not defined! Name :&Name'
+               ENDIF
+               ENDM
+
+; Name tells for itself
+@SetStatusText MACRO Name, Text, Style, Part
+               LOCAL @1
+               IFDEF stat&Name
+               .data
+               @1    Db Text, 0
+
+               .code
+                 invoke SendMessage, stat&Name, SB_SETTEXT, Style+Part, OFFSET @1
+               ELSE
+                 @MakeError 'Status line was not defined! Name :&Name'
+               ENDIF
+               ENDM
+
+; Name tells for itself
+@GetStatusText MACRO Name, lpBuffer, Part
+               IFDEF stat&Name
+                 invoke SendMessage, stat&Name, SB_GETTEXT, Part, lpBuffer
+               ELSE
+                 @MakeError 'Status line was not defined! Name :&Name'
+               ENDIF
+               ENDM
+
+@SetStatusParts MACRO Name, Parts, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10
+                LOCAL @1
+                IFDEF stat&Name
+                .data
+                @1    Dd P1, P2, P3, P4, P5, P6, P7, P8, P8, P9, P10
+                .code
+                  invoke SendMessage, stat&Name, SB_SETPARTS, Parts, OFFSET @1
+                ELSE
+                  @MakeError 'Status line was not defined! Name :&Name'
+                ENDIF
+                ENDM

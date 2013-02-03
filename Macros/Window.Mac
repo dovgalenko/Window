@@ -1,0 +1,412 @@
+comment~
+
+      Small macroses for Win32 Assembly.
+
+      The CHEMI$T Copyright(C)2001      					      02.05.2001
+
+~
+
+WINDOW_STR     STRUC
+ID             Db  ?
+sSize          Dd  ?
+wnd            WNDCLASSEX <?>
+hThread        Dd  ?
+hImage         Dd  ?
+WINDOW_STR     ENDS
+
+@WndHandlerStart MACRO Name, Event
+                 OnWnd&Event&Name   PROTO :DWORD, :DWORD, :DWORD, :DWORD
+
+                 OnWnd&Event&Name   Proc USES Ebx Ecx Edx Esi Edi hWin:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
+                 ENDM
+
+@WndHandlerEnd   MACRO Name, Event
+                   ret
+                 OnWnd&Event&Name   Endp
+                 ENDM
+
+@WndMnuHandlerStart MACRO Event
+                 menuOn&Event   PROTO :DWORD, :DWORD, :DWORD, :DWORD
+
+                 menuOn&Event   Proc USES Ebx Ecx Edx Esi Edi hWin:DWORD, uMsg:DWORD, wParam:DWORD, lParam:DWORD
+                 ENDM
+
+@WndMnuHandlerEnd   MACRO Event
+                   ret
+                 menuOn&Event   Endp
+                 ENDM
+
+@WndProcedureBegin  MACRO Name, sx, sy, csx, csy
+               .code
+               WndProc&Name   Proc hWin   :DWORD,
+                                   uMsg   :DWORD,
+                                   wParam :DWORD,
+                                   lParam :DWORD
+
+                 LOCAL PaintStruct:PAINTSTRUCT
+                 LOCAL hBitmap,hOldBitmap:HANDLE
+                 LOCAL hDC, hCompatibleDC:HDC
+                 LOCAL Rect:RECT
+                 LOCAL Bitmap:BITMAP
+
+                 .if uMsg == WM_CLOSE
+                   ; Отработка пользовательского события OnWndClose
+                   IFDEF OnWndClose&Name
+                     invoke OnWndClose&Name, hWin, uMsg, wParam, lParam
+                     ; Если возвращено значение FALSE - закрываем окно.
+                     .if !eax
+                   ENDIF
+
+                     invoke PostQuitMessage, hWin
+
+                   IFDEF OnWndClose&Name
+                     .else
+                     ; ... иначе - забудем
+                       mov    eax, TRUE
+                       ret
+                     .endif
+                   ENDIF
+
+                 .elseif uMsg == WM_PAINT
+                   push  ebx
+                   mov   ebx, Wnd&Name
+                   @AssumePtr WINDOW_STR
+                     .if [ebx].hImage != 0
+                       invoke BeginPaint, hWin, ADDR PaintStruct
+                       mov    hDC, eax
+
+                       invoke GetObject, [ebx].hImage, SIZEOF BITMAP, ADDR Bitmap
+                       invoke CreateCompatibleDC, hDC
+                       mov    hCompatibleDC, eax
+                       invoke SelectObject, hCompatibleDC, [ebx].hImage
+                       mov    hOldBitmap, eax
+                       invoke GetClientRect, hWin, ADDR Rect
+                       invoke StretchBlt, hDC,0,0,Rect.right,Rect.bottom,hCompatibleDC,0,0,Bitmap.bmWidth, Bitmap.bmHeight,SRCCOPY
+                       invoke SelectObject, hCompatibleDC, hOldBitmap
+                       invoke DeleteDC, hCompatibleDC
+                       invoke EndPaint, hWin, ADDR PaintStruct
+                     .endif
+                   @AssumeNo
+                   pop  ebx
+
+                   IFDEF OnWndPaint&Name
+                     invoke OnWndPaint&Name, hWin, uMsg, wParam, lParam
+                   ENDIF
+                   xor   eax, eax
+
+                 IFDEF OnWndHelp&Name
+                 .elseif uMsg == WM_HELP
+                   invoke OnWndHelp&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 .elseif uMsg == WM_ACTIVATEAPP
+                   .if wParam == TRUE
+                     IFDEF OnWndActivate&Name
+                       invoke OnWndActivate&Name, hWin, uMsg, wParam, lParam
+                     ENDIF
+                   .else
+                     IFDEF OnWndDeactivate&Name
+                       invoke OnWndDeactivate&Name, hWin, uMsg, wParam, lParam
+                     ENDIF
+                   .endif
+                   xor   eax, eax
+
+                 IFDEF OnWndSysCommand&Name
+                 .elseif uMsg == WM_SYSCOMMAND
+                   invoke OnWndSysCommand&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 .elseif uMsg == WM_SHOWWINDOW
+                   .if wParam == TRUE
+                     IFDEF OnWndShow&Name
+                       invoke OnWndShow&Name, hWin, uMsg, wParam, lParam
+                     ENDIF
+                   .else
+                     IFDEF OnWndHide&Name
+                       invoke OnWndHide&Name, hWin, uMsg, wParam, lParam
+                     ENDIF
+                   .endif
+                   xor   eax, eax
+
+                 .elseif uMsg == WM_CREATE
+                   invoke SetWindowPos, hWin, NULL, sx, sy, \
+                          csx, csy, SWP_NOZORDER or SWP_NOACTIVATE                          
+
+                   ; Отработка пользовательского события OnWndCreate
+                   IFDEF OnWndCreate&Name
+                     invoke OnWndCreate&Name, hWin, uMsg, wParam, lParam
+                   ENDIF
+                   xor   eax, eax
+
+                 ; Отработка пользовательского события OnWndDestroy
+                 IFDEF OnWndDestroy&Name
+                 .elseif uMsg == WM_DESTROY
+                   invoke OnWndDestroy&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 ; Отработка пользовательского события OnWndKeyDown
+                 IFDEF OnWndKeyDown&Name
+                 .elseif uMsg == WM_KEYDOWN
+                   invoke OnWndKeyDown&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 ; Отработка пользовательского события OnWndKeyUp
+                 IFDEF OnWndKeyUp&Name
+                 .elseif uMsg == WM_KEYUP
+                   invoke OnWndKeyUp&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 IFDEF OnWndResize&Name
+                 .elseif uMsg == WM_SIZE
+                   invoke OnWndResize&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 IFDEF OnWndDblClick&Name
+                 .elseif uMsg == WM_LBUTTONDBLCLK || \
+                         uMsg == WM_MBUTTONDBLCLK || \
+                         uMsg == WM_RBUTTONDBLCLK
+
+                   invoke OnWndDblClick&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 IFDEF OnWndMouseUp&Name
+                 .elseif uMsg == WM_LBUTTONUP || \
+                         uMsg == WM_MBUTTONUP || \
+                         uMsg == WM_RBUTTONUP
+
+                   invoke OnWndMouseUp&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 IFDEF OnWndMouseDown&Name
+                 .elseif uMsg == WM_LBUTTONDOWN || \
+                         uMsg == WM_MBUTTONDOWN || \
+                         uMsg == WM_RBUTTONDOWN
+
+                   invoke OnWndMouseDown&Name, hWin, uMsg, wParam, lParam
+                   xor   eax, eax
+                 ENDIF
+
+                 .elseif uMsg == WM_MOUSEWHEEL
+                   mov   eax, wParam
+                   shr   eax, 16
+                   .if eax > 128
+                     IFDEF OnWndWheelDown&Name
+                       invoke OnWndWheelDown&Name, hWin, uMsg, wParam, lParam
+                     ENDIF
+                   .else
+                     IFDEF OnWndWheelUp&Name
+                       invoke OnWndWheelUp&Name, hWin, uMsg, wParam, lParam
+                     ENDIF
+                   .endif
+                   xor   eax, eax
+
+                 .elseif uMsg == WM_COMMAND
+               ENDM
+
+@WndMenuHandler  MACRO uID, Event
+                 IFDEF menuOn&Event
+                   mov   eax, wParam
+                   .if wParam == uID
+                     invoke menuOn&Event, hWin, uMsg, wParam, lParam
+                   .endif
+                 ELSE
+                   @MakeError 'Menu handler procedure does not exist! Name: menuOn&Event'
+                 ENDIF
+                 ENDM
+
+@SetWndSize      MACRO Name, sWidth, sHeight
+                 invoke SetWindowPos, hWnd&Name, NULL, NULL, NULL, \
+                        sWidth, sHeight, SWP_NOZORDER or SWP_NOACTIVATE or SWP_NOMOVE
+                 ENDM
+
+@MoveWnd         MACRO Name, sX, sY
+                 invoke SetWindowPos, hWnd&Name, NULL, sX, sY, \
+                        NULL, NULL, SWP_NOZORDER or SWP_NOACTIVATE or SWP_NOSIZE
+                 ENDM
+
+@WndUserHandler  MACRO Name, Msg
+                 IFDEF OnWnd&Msg&Name
+                 .elseif uMsg == Msg
+                   invoke OnWnd&Msg&Name, hWin, uMsg, wParam, lParam
+                 ELSE
+                   @MakeError 'А что, собственно, обрабатываем?'
+                 ENDIF
+                 ENDM
+
+@WndProcedureEnd MACRO Name
+                      IFDEF OnWndCommand&Name
+                        invoke OnWndCommand&Name, hWin, uMsg, wParam, lParam
+                        xor   eax, eax
+                      ENDIF
+                    .endif
+              
+                    invoke DefWindowProc, hWin, uMsg, wParam, lParam
+                    ret
+                  WndProc&Name   endp
+                  ENDM
+
+@CreateWindow  MACRO Name, Instance, Parent, wClass, Style, ExtStyle, Title, Icon, Brush, Cursor, Menu
+               IFDEF WndProc&Name
+               .data
+                 WndClass&Name  Db wClass, 0
+                 WndTitle&Name  Db Title, 0
+
+               .code
+               @GetMemory SIZEOF WINDOW_STR
+               mov    Wnd&Name, eax
+               mov    ebx, eax
+
+               @AssumePtr WINDOW_STR
+                 lea    eax, [ebx].wnd
+                 invoke RtlZeroMemory, eax, SIZEOF WNDCLASSEX
+                 mov    [ebx].wnd.cbSize, SIZEOF WNDCLASSEX
+                 mov    [ebx].wnd.style, CS_VREDRAW or CS_HREDRAW or CS_DBLCLKS
+                 mov    [ebx].wnd.lpfnWndProc, Offset WndProc&Name
+                 mov    [ebx].wnd.cbClsExtra, NULL
+                 mov    [ebx].wnd.cbWndExtra, NULL
+                 mov    eax, Instance
+                 mov    [ebx].wnd.hInstance, eax
+                 mov    eax, Icon
+                 mov    [ebx].wnd.hIcon, eax
+                 mov    eax, Cursor
+                 mov    [ebx].wnd.hCursor, eax
+                 mov    eax, Brush
+                 mov    [ebx].wnd.hbrBackground, eax
+                 mov    eax, Menu
+                 mov    [ebx].wnd.lpszMenuName, eax
+                 mov    [ebx].wnd.lpszClassName, OFFSET WndClass&Name
+                 mov    eax, Icon
+                 mov    [ebx].wnd.hIconSm, eax
+                 lea    eax, [ebx].wnd
+                 invoke RegisterClassEx, eax
+
+                 invoke CreateWindowEx, ExtStyle, OFFSET WndClass&Name, \
+                                        OFFSET WndTitle&Name, Style, \
+                                        CW_USEDEFAULT, CW_USEDEFAULT, \
+                                        CW_USEDEFAULT, CW_USEDEFAULT, \
+                                        Parent, Menu, Instance, NULL
+                 mov    hWnd&Name, eax
+               @AssumeNo
+               ELSE
+                 @MakeError Не определена функция-обработчик для окна. Имя: &Name
+               ENDIF
+               ENDM
+
+@GetHwnd       MACRO Name
+                 mov  eax, hWnd&Name
+               ENDM
+
+@GetDC         MACRO Name
+               IFDEF hWnd&Name
+                 mov  eax, hWnd&Name
+                 invoke GetDC, eax
+               ELSE
+                 @MakeError 'Похоже, окно не существует! Имя &Name'
+               ENDIF
+               ENDM
+
+@SetWndImage   MACRO Name, ourImage
+               IFDEF hWnd&Name
+                 mov  ebx, Wnd&Name
+                 @AssumePtr WINDOW_STR
+                 mov  eax, ourImage
+                 mov  [ebx].hImage, eax
+                 @AssumeNo
+               ELSE
+                 @MakeError 'Похоже, окно не существует! Имя &Name'
+               ENDIF
+               ENDM
+
+@SendEvent     MACRO DstWnd, Event
+               IFDEF OnWnd&Event&DstWnd
+                 invoke OnWnd&Event&DstWnd, hWin, uMsg, wParam, lParam
+               ELSE
+                 @MakeError 'Куда передаем данные, инетересно? Имя окна: &DstWnd'
+               ENDIF
+               ENDM
+
+@SetParent     MACRO NameParent, NameChild
+               IFDEF hWnd&NameChild
+                 IFDEF hWnd&NameParent
+                   invoke GetWindowLong, hWnd&NameChild, GWL_STYLE
+                   or     eax, WS_POPUP
+                   add    eax, WS_CHILDWINDOW
+                   invoke SetWindowLong, hWnd&NameChild, GWL_STYLE, eax
+                   invoke SetParent, hWnd&NameChild, hWnd&NameParent
+                 ELSE
+                   @MakeError 'Не существует окно, имя: &NameParent'
+                 ENDIF
+               ELSE
+                 @MakeError 'Не существует окно, имя: &NameChild'
+               ENDIF
+               ENDM
+
+@ProcessMsgs   MACRO Name, Threaded
+               LOCAL WndThread
+               LOCAL MainStream
+
+               IFDEF Wnd&Name
+
+                 IF Threaded EQ TRUE
+                   push   ebx
+                   mov    ebx, Wnd&Name
+                   @AssumePtr WINDOW_STR
+                   lea    ebx, [ebx].hThread
+                   lea    ecx, WndThread
+                   invoke CreateThread, NULL, NULL, ecx, NULL, NULL, ebx
+                   @AssumeNo
+                   pop    ebx
+                   jmp    MainStream
+
+               WndThread:
+
+                 pop   eax    ; Get one parameter from stack
+
+                 ENDIF
+                 .if eax
+                   invoke ShowWindow, hWnd&Name, SW_SHOWNORMAL
+                   invoke UpdateWindow, hWnd&Name
+   
+                   .while TRUE
+                     invoke GetMessage, OFFSET Msg&Name, NULL, 0, 0
+                     .break .if (!eax)
+  
+                     invoke TranslateMessage, OFFSET Msg&Name
+                     invoke DispatchMessage, OFFSET Msg&Name
+                   .endw
+                 .endif
+                 mov    ebx, Wnd&Name
+                 @AssumePtr WINDOW_STR
+                 mov    [ebx].hThread, 0
+                 @AssumeNo
+
+               MainStream:
+               ELSE
+                 @MakeError 'Нет окна для обработки сообщений!'
+               ENDIF
+               ENDM
+
+@DestroyWindow MACRO Name
+               IFDEF Wnd&Name
+                 push  ebx
+                 mov   ebx, Wnd&Name
+                 @AssumePtr WINDOW_STR
+                 .if [ebx].hThread != 0
+                   invoke TerminateThread, [ebx].hThread, 0
+                 .endif
+                 invoke DestroyWindow, hWnd&Name
+                 @FreeMemory Wnd&Name
+                 @AssumeNo
+                 pop    ebx
+               ELSE
+                 @MakeError Интересно, а что именно МЫ хотим уничтожить? Имя: &Name
+               ENDIF
+               ENDM

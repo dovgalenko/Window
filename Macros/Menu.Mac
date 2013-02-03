@@ -1,0 +1,45 @@
+comment~
+
+      Small macroses for Win32 Assembly.
+
+      The CHEMI$T Copyright(C)2001      					      02.05.2001
+
+~
+
+@CreateMenu   MACRO Name
+              IFDEF menu&Name
+                invoke CreateMenu
+                mov    menu&Name, eax
+              ELSE
+                @MakeError 'Menu was not defined! Name :&Name'
+              ENDIF
+              ENDM
+
+@AppendMenu   MACRO Name, Caption, uID
+              LOCAL @1
+
+              IFDEF menu&Name
+              .data
+              @1    Db  Caption, 0 
+              .code
+                invoke AppendMenu, menu&Name, MF_STRING or MF_ENABLED, uID, OFFSET @1
+              ELSE
+                @MakeError 'Menu was not defined! Name :&Name'
+              ENDIF
+              ENDM
+
+@AttachMenu   MACRO WindowName, Name
+              IFDEF menu&Name
+                invoke SetMenu, hWnd&WindowName, menu&Name
+              ELSE
+                @MakeError 'Menu was not defined! Name :&Name'
+              ENDIF
+              ENDM
+
+@DestroyMenu  MACRO Name
+              IFDEF menu&Name
+                invoke DestroyMenu, menu&Name
+              ELSE
+                @MakeError 'Menu was not defined! Name :&Name'
+              ENDIF
+              ENDM
