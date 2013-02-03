@@ -50,10 +50,10 @@ WINDOW_STR     ENDS
                  LOCAL Bitmap:BITMAP
 
                  .if uMsg == WM_CLOSE
-                   ; é‚‡†°Æ‚™† ØÆ´ÏßÆ¢†‚•´Ï·™Æ£Æ ·Æ°Î‚®Ô OnWndClose
+                   ; –û—Ç—Ä–∞–±–æ—Ç–∫–∞ –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—å—Å–∫–æ–≥–æ —Å–æ–±—ã—Ç–∏—è OnWndClose
                    IFDEF OnWndClose&Name
                      invoke OnWndClose&Name, hWin, uMsg, wParam, lParam
-                     ; Ö·´® ¢Æß¢‡†È•≠Æ ß≠†Á•≠®• FALSE - ß†™‡Î¢†•¨ Æ™≠Æ.
+                     ; –ï—Å–ª–∏ –≤–æ–∑–≤—Ä–∞—â–µ–Ω–æ –∑–Ω–∞—á–µ–Ω–∏–µ FALSE - –∑–∞–∫—Ä—ã–≤–∞–µ–º –æ–∫–Ω–æ.
                      .if !eax
                    ENDIF
 
@@ -61,7 +61,7 @@ WINDOW_STR     ENDS
 
                    IFDEF OnWndClose&Name
                      .else
-                     ; ... ®≠†Á• - ß†°„§•¨
+                     ; ... –∏–Ω–∞—á–µ - –∑–∞–±—É–¥–µ–º
                        mov    eax, TRUE
                        ret
                      .endif
@@ -134,27 +134,27 @@ WINDOW_STR     ENDS
                    invoke SetWindowPos, hWin, NULL, sx, sy, \
                           csx, csy, SWP_NOZORDER or SWP_NOACTIVATE                          
 
-                   ; é‚‡†°Æ‚™† ØÆ´ÏßÆ¢†‚•´Ï·™Æ£Æ ·Æ°Î‚®Ô OnWndCreate
+                   ; –û—Ç—Ä–∞–±–æ—Ç–∫–∞ –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—å—Å–∫–æ–≥–æ —Å–æ–±—ã—Ç–∏—è OnWndCreate
                    IFDEF OnWndCreate&Name
                      invoke OnWndCreate&Name, hWin, uMsg, wParam, lParam
                    ENDIF
                    xor   eax, eax
 
-                 ; é‚‡†°Æ‚™† ØÆ´ÏßÆ¢†‚•´Ï·™Æ£Æ ·Æ°Î‚®Ô OnWndDestroy
+                 ; –û—Ç—Ä–∞–±–æ—Ç–∫–∞ –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—å—Å–∫–æ–≥–æ —Å–æ–±—ã—Ç–∏—è OnWndDestroy
                  IFDEF OnWndDestroy&Name
                  .elseif uMsg == WM_DESTROY
                    invoke OnWndDestroy&Name, hWin, uMsg, wParam, lParam
                    xor   eax, eax
                  ENDIF
 
-                 ; é‚‡†°Æ‚™† ØÆ´ÏßÆ¢†‚•´Ï·™Æ£Æ ·Æ°Î‚®Ô OnWndKeyDown
+                 ; –û—Ç—Ä–∞–±–æ—Ç–∫–∞ –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—å—Å–∫–æ–≥–æ —Å–æ–±—ã—Ç–∏—è OnWndKeyDown
                  IFDEF OnWndKeyDown&Name
                  .elseif uMsg == WM_KEYDOWN
                    invoke OnWndKeyDown&Name, hWin, uMsg, wParam, lParam
                    xor   eax, eax
                  ENDIF
 
-                 ; é‚‡†°Æ‚™† ØÆ´ÏßÆ¢†‚•´Ï·™Æ£Æ ·Æ°Î‚®Ô OnWndKeyUp
+                 ; –û—Ç—Ä–∞–±–æ—Ç–∫–∞ –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—å—Å–∫–æ–≥–æ —Å–æ–±—ã—Ç–∏—è OnWndKeyUp
                  IFDEF OnWndKeyUp&Name
                  .elseif uMsg == WM_KEYUP
                    invoke OnWndKeyUp&Name, hWin, uMsg, wParam, lParam
@@ -237,7 +237,7 @@ WINDOW_STR     ENDS
                  .elseif uMsg == Msg
                    invoke OnWnd&Msg&Name, hWin, uMsg, wParam, lParam
                  ELSE
-                   @MakeError 'Ä Á‚Æ, ·Æ°·‚¢•≠≠Æ, Æ°‡†°†‚Î¢†•¨?'
+                   @MakeError '–ê —á—Ç–æ, —Å–æ–±—Å—Ç–≤–µ–Ω–Ω–æ, –æ–±—Ä–∞–±–∞—Ç—ã–≤–∞–µ–º?'
                  ENDIF
                  ENDM
 
@@ -296,7 +296,7 @@ WINDOW_STR     ENDS
                  mov    hWnd&Name, eax
                @AssumeNo
                ELSE
-                 @MakeError ç• ÆØ‡•§•´•≠† ‰„≠™Ê®Ô-Æ°‡†°Æ‚Á®™ §´Ô Æ™≠†. à¨Ô: &Name
+                 @MakeError –ù–µ –æ–ø—Ä–µ–¥–µ–ª–µ–Ω–∞ —Ñ—É–Ω–∫—Ü–∏—è-–æ–±—Ä–∞–±–æ—Ç—á–∏–∫ –¥–ª—è –æ–∫–Ω–∞. –ò–º—è: &Name
                ENDIF
                ENDM
 
@@ -309,7 +309,7 @@ WINDOW_STR     ENDS
                  mov  eax, hWnd&Name
                  invoke GetDC, eax
                ELSE
-                 @MakeError 'èÆÂÆ¶•, Æ™≠Æ ≠• ·„È•·‚¢„•‚! à¨Ô &Name'
+                 @MakeError '–ü–æ—Ö–æ–∂–µ, –æ–∫–Ω–æ –Ω–µ —Å—É—â–µ—Å—Ç–≤—É–µ—Ç! –ò–º—è &Name'
                ENDIF
                ENDM
 
@@ -321,7 +321,7 @@ WINDOW_STR     ENDS
                  mov  [ebx].hImage, eax
                  @AssumeNo
                ELSE
-                 @MakeError 'èÆÂÆ¶•, Æ™≠Æ ≠• ·„È•·‚¢„•‚! à¨Ô &Name'
+                 @MakeError '–ü–æ—Ö–æ–∂–µ, –æ–∫–Ω–æ –Ω–µ —Å—É—â–µ—Å—Ç–≤—É–µ—Ç! –ò–º—è &Name'
                ENDIF
                ENDM
 
@@ -329,7 +329,7 @@ WINDOW_STR     ENDS
                IFDEF OnWnd&Event&DstWnd
                  invoke OnWnd&Event&DstWnd, hWin, uMsg, wParam, lParam
                ELSE
-                 @MakeError 'ä„§† Ø•‡•§†•¨ §†≠≠Î•, ®≠•‚•‡•·≠Æ? à¨Ô Æ™≠†: &DstWnd'
+                 @MakeError '–ö—É–¥–∞ –ø–µ—Ä–µ–¥–∞–µ–º –¥–∞–Ω–Ω—ã–µ, –∏–Ω–µ—Ç–µ—Ä–µ—Å–Ω–æ? –ò–º—è –æ–∫–Ω–∞: &DstWnd'
                ENDIF
                ENDM
 
@@ -342,10 +342,10 @@ WINDOW_STR     ENDS
                    invoke SetWindowLong, hWnd&NameChild, GWL_STYLE, eax
                    invoke SetParent, hWnd&NameChild, hWnd&NameParent
                  ELSE
-                   @MakeError 'ç• ·„È•·‚¢„•‚ Æ™≠Æ, ®¨Ô: &NameParent'
+                   @MakeError '–ù–µ —Å—É—â–µ—Å—Ç–≤—É–µ—Ç –æ–∫–Ω–æ, –∏–º—è: &NameParent'
                  ENDIF
                ELSE
-                 @MakeError 'ç• ·„È•·‚¢„•‚ Æ™≠Æ, ®¨Ô: &NameChild'
+                 @MakeError '–ù–µ —Å—É—â–µ—Å—Ç–≤—É–µ—Ç –æ–∫–Ω–æ, –∏–º—è: &NameChild'
                ENDIF
                ENDM
 
@@ -390,7 +390,7 @@ WINDOW_STR     ENDS
 
                MainStream:
                ELSE
-                 @MakeError 'ç•‚ Æ™≠† §´Ô Æ°‡†°Æ‚™® ·ÆÆ°È•≠®©!'
+                 @MakeError '–ù–µ—Ç –æ–∫–Ω–∞ –¥–ª—è –æ–±—Ä–∞–±–æ—Ç–∫–∏ —Å–æ–æ–±—â–µ–Ω–∏–π!'
                ENDIF
                ENDM
 
@@ -407,6 +407,6 @@ WINDOW_STR     ENDS
                  @AssumeNo
                  pop    ebx
                ELSE
-                 @MakeError à≠‚•‡•·≠Æ, † Á‚Æ ®¨•≠≠Æ åõ ÂÆ‚®¨ „≠®Á‚Æ¶®‚Ï? à¨Ô: &Name
+                 @MakeError –ò–Ω—Ç–µ—Ä–µ—Å–Ω–æ, –∞ —á—Ç–æ –∏–º–µ–Ω–Ω–æ –ú–´ —Ö–æ—Ç–∏–º —É–Ω–∏—á—Ç–æ–∂–∏—Ç—å? –ò–º—è: &Name
                ENDIF
                ENDM

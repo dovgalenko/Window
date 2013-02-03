@@ -10,8 +10,8 @@ comment~
                %echo
                %echo The CHEMI$T Copyright(C)2004
                %echo
-               %echo Версия компилятора : @Version
-               %echo Дата компиляции    : @Date, @Time
+               %echo Compiler version	: @Version
+               %echo Compilation date	: @Date, @Time
                %echo
              ENDM
 
@@ -55,14 +55,14 @@ comment~
                IFDEF DEBUG
                  Push     eax
                  mov      eax, Size
-                 PrintDec eax, 'MEM: !> Резервирование памяти.'
+                 PrintDec eax, 'MEM: !> Reserving memory.'
                  pop      eax
                ENDIF
              ENDIF
                invoke LocalAlloc, LMEM_FIXED or LMEM_ZEROINIT, &Size
              IFDEF SHOWMEM
                IFDEF DEBUG
-                 PrintHex eax, ' выделенный адрес.'
+                 PrintHex eax, ' reserved address.'
                ENDIF
              ENDIF
              ENDM
@@ -70,10 +70,10 @@ comment~
 @FreeMemory  MACRO mHandle
              IFDEF SHOWMEM
                IFDEF DEBUG
-                 PrintText         'MEM: !> Высвобождение памяти.'
+                 PrintText         'MEM: !> Releasing memory.'
                  push   eax
                  mov    eax, mHandle
-                 PrintHex eax, ' высвобождаемый адрес.'
+                 PrintHex eax, ' releasing address.'
                  pop    eax
                ENDIF
              ENDIF
